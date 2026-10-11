@@ -1,0 +1,23 @@
+name: Dashboard data refresh
+on:
+  workflow_dispatch:
+  push:
+    paths: ['data/state.json','config/settings.json']
+permissions:
+  contents: write
+concurrency:
+  group: tapsroute-state-writer
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: PYTHONPATH=src python -m tapsroute.dashboard
+      - run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+users.noreply.github.com
+          git add data/dashboard.json
+          git diff --cached --quiet || (git commit -m 'Refresh dashboard data' && git push)

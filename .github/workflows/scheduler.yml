@@ -1,0 +1,31 @@
+name: Scheduled publishing and dashboard refresh
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: tapsroute-state-writer
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: PYTHONPATH=src python -m tapsroute.cli publish-due
+        env:
+          TEST_MODE: ${{ vars.TAPSROUTE_TEST_MODE || 'true' }}
+          META_API_VERSION: ${{ vars.META_API_VERSION }}
+          META_PAGE_ID: ${{ vars.META_PAGE_ID }}
+          META_IG_USER_ID: ${{ vars.META_IG_USER_ID }}
+          META_PAGE_ACCESS_TOKEN: ${{ secrets.META_PAGE_ACCESS_TOKEN }}
+      - run: PYTHONPATH=src python -m tapsroute.dashboard
+      - name: Commit state and dashboard data
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add data/state.json data/dashboard.json
+          git diff --cached --quiet || (git commit -m 'Update social automation state' && git push)

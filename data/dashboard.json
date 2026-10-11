@@ -1,0 +1,62 @@
+{
+  "generation_days": {},
+  "posts": [],
+  "events": [],
+  "settings": {
+    "timezone": "Asia/Kolkata",
+    "daily_generation_limit": 12,
+    "approval_required": true,
+    "auto_publish": true,
+    "test_mode": true,
+    "retry_limit": 3,
+    "default_languages": [
+      "English",
+      "Hindi",
+      "Marathi"
+    ],
+    "categories": [
+      "Indian holidays",
+      "International holidays",
+      "Weekend trips",
+      "Honeymoon",
+      "Family holidays",
+      "Adventure",
+      "Destination guide",
+      "Itinerary",
+      "Seasonal inspiration",
+      "Tapsroute promotion"
+    ],
+    "destinations": [
+      "Jaipur",
+      "Goa",
+      "Kerala",
+      "Manali",
+      "Udaipur",
+      "Sikkim",
+      "Dubai",
+      "Bali",
+      "Singapore"
+    ],
+    "posting_times": [
+      "10:00",
+      "18:00"
+    ],
+    "platform_targets": [
+      "facebook",
+      "instagram"
+    ],
+    "brand": {
+      "primary": "#f47721",
+      "website": "https://tapsroute.com",
+      "contact": "+91 8450-98-4534",
+      "email": "customer.experience@tapsroute.com",
+      "logo_path": ""
+    },
+    "text_provider": "ollama",
+    "ollama_model": "qwen2.5:3b",
+    "image_provider": "import_only",
+    "meta_api_version": "v23.0"
+  },
+  "github_repository": "",
+  "last_successful_run": null
+}

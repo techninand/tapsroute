@@ -1,0 +1,8 @@
+__pycache__/
+.venv/
+.pytest_cache/
+*.py[cod]
+.env
+models/
+._*
+data/state.lock

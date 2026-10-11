@@ -1,0 +1,37 @@
+name: Review a social post
+on:
+  workflow_dispatch:
+    inputs:
+      post_id: {description: 'Post ID from dashboard', required: true, type: string}
+      decision: {description: 'Approval decision', required: true, type: choice, options: [approve, reject]}
+      platforms: {description: 'Approved platforms, space separated (approve only)', required: false, type: string}
+permissions:
+  contents: write
+concurrency:
+  group: tapsroute-state-writer
+  cancel-in-progress: false
+jobs:
+  review:
+    if: github.event.sender.type != 'Bot'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - if: inputs.decision == 'approve'
+        run: PYTHONPATH=src python -m tapsroute.cli approve "$POST_ID" --reviewer "$REVIEWER" $PLATFORMS
+        env:
+          POST_ID: ${{ inputs.post_id }}
+          REVIEWER: ${{ github.actor }}
+          PLATFORMS: ${{ inputs.platforms }}
+      - if: inputs.decision == 'reject'
+        run: PYTHONPATH=src python -m tapsroute.cli reject "$POST_ID" --reviewer "$REVIEWER"
+        env:
+          POST_ID: ${{ inputs.post_id }}
+          REVIEWER: ${{ github.actor }}
+      - run: PYTHONPATH=src python -m tapsroute.dashboard
+      - run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+users.noreply.github.com
+          git add data/state.json data/dashboard.json
+          git commit -m 'Record post review' && git push
