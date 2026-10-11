@@ -5,6 +5,7 @@ on:
       count: {description: 'Items (up to remaining daily allowance)', required: true, default: '1', type: string}
       destination: {description: 'Optional destination', required: false, type: string}
       language: {description: 'English, Hindi, or Marathi', required: true, default: 'English', type: choice, options: [English, Hindi, Marathi]}
+      dry_run: {description: 'Create synthetic content without calling Ollama', required: true, default: true, type: boolean}
 permissions:
   contents: write
 concurrency:
@@ -21,7 +22,9 @@ jobs:
       - name: Generate and persist allowance even when provider fails
         run: |
           set +e
-          PYTHONPATH=src python -m tapsroute.cli generate --count "$COUNT" --language "$LANGUAGE"
+          mode=""
+          if [ "$DRY_RUN" = "true" ]; then mode="--dry-run"; fi
+          PYTHONPATH=src python -m tapsroute.cli generate --count "$COUNT" --language "$LANGUAGE" $mode
           result=$?
           PYTHONPATH=src python -m tapsroute.dashboard
           git config user.name github-actions[bot]
@@ -33,5 +36,6 @@ jobs:
           COUNT: ${{ inputs.count }}
           LANGUAGE: ${{ inputs.language }}
           DESTINATION: ${{ inputs.destination }}
+          DRY_RUN: ${{ inputs.dry_run }}
           OLLAMA_URL: ${{ secrets.OLLAMA_URL }}
           OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL || 'qwen2.5:3b' }}

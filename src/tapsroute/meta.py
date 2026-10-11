@@ -28,17 +28,17 @@ def publish(platform, post):
         if not result.get("post_id"): raise MetaError("Facebook did not return a Page post ID")
         return result["post_id"]
     if platform=="instagram":
-        account=os.getenv("META_IG_USER_ID",""); base=f"https://graph.facebook.com/{version}/{account}"
+        account=os.getenv("META_IG_USER_ID",""); root=f"https://graph.facebook.com/{version}"; base=f"{root}/{account}"
         container=_post(base+"/media",{"image_url":image,"caption":caption,"access_token":token})
         cid=container.get("id")
         if not cid: raise MetaError("Instagram media container creation failed")
-        for _ in range(12):
-            check_req=urllib.request.Request(base+"/"+urllib.parse.quote(cid)+"?fields=status_code",headers={"Authorization":"Bearer "+token})
+        for _ in range(10):
+            check_req=urllib.request.Request(root+"/"+urllib.parse.quote(cid)+"?fields=status_code",headers={"Authorization":"Bearer "+token})
             check=urllib.request.urlopen(check_req,timeout=30)
             state=json.loads(check.read()).get("status_code")
             if state=="FINISHED": break
             if state in ("ERROR","EXPIRED"): raise MetaError("Instagram media processing failed")
-            time.sleep(5)
+            time.sleep(30)
         else: raise MetaError("Instagram media container was not ready",True)
         result=_post(base+"/media_publish",{"creation_id":cid,"access_token":token})
         if not result.get("id"): raise MetaError("Instagram publishing did not return a media ID")

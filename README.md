@@ -9,7 +9,7 @@ A free-first, repository-backed social publishing starter for Tapsroute. The sta
 | Responsive static dashboard and repository data | Implemented; deploy Pages from the default branch root and run Dashboard data refresh |
 | Daily generation limit and IST calendar | Implemented with cross-process file lock and atomic JSON writes; GitHub workflow concurrency serializes repository writes |
 | AI text | Optional local Ollama adapter implemented; model/runtime and secure reachability from Actions are owner prerequisites |
-| AI image generation | Not implemented in the hosted worker. Import-only adapter is implemented; generated AI files must be imported and matched to destination manually |
+| AI image generation | Not implemented in the hosted worker. The worker can reuse only an owner-approved destination-matched AI image declared in `data/image-library.json`; otherwise the post is blocked |
 | Human approval | GitHub `workflow_dispatch` approval/rejection workflow; requires repo write permission. Material edits must increment `content_version` and return the post to pending approval |
 | Due-post scheduler | Implemented at 15-minute cadence; cron can be delayed by GitHub |
 | Meta publishing | Official Graph API photo/feed and Instagram image feed sequence implemented, but **untested against owner accounts**. TEST_MODE defaults on |
@@ -57,9 +57,11 @@ The worker reserves daily allowance before invoking the model. A provider failur
 
 Generation currently requires an Ollama service reachable from the worker. GitHub-hosted runners do not have GPUs or access to a laptop's localhost. For a hosted manual run, set the GitHub Actions secret `OLLAMA_URL` to an owner-managed, securely exposed Ollama endpoint and a repository variable `OLLAMA_MODEL`; never expose an unauthenticated public Ollama port. This project does not provide a tunnel or service. If you do not have a secure endpoint, run content locally and import it through repository changes; the GitHub generation workflow cannot reach a local-only Ollama service.
 
+The **Generate content** workflow defaults to `dry_run: true`. It creates a clearly marked synthetic post, updates the durable IST counter and does not call Ollama. It still requires an approved, destination-matched image library item before it can leave the blocked state. Set `dry_run: false` only when the secure Ollama prerequisite is in place.
+
 ## AI images
 
-The project does not bundle image weights or run image generation on Actions. Generate an image with a locally run open-source image model under its license, then place the original and final branded AI image under `images/`. Update the post's `image_path`, prompt, model identifier and status; use a destination-matched image and add branded typography with a deterministic renderer before approval. Do not infer publicly accessible image URLs from local paths. The `public_image_url` adapter returns a Pages URL only when `PUBLIC_PAGES_CONFIRMED=true` and a repository is configured; the owner must independently verify that URL from outside GitHub. For Instagram, set `image_url` to a verified public HTTPS URL before approval or the post is blocked. GitHub Pages is public; never publish sensitive assets. Check current GitHub repository and Pages limits before adding large image libraries.
+The project does not bundle image weights or run image generation on Actions. Generate an image with a locally run open-source image model under its license, then place the original and final branded AI image under `images/`. Add an entry to `data/image-library.json` only after validating its destination, categories, model, prompt, original/final asset paths and public URL. The fallback accepts entries only when `validated_for_destination` is true, the destination matches exactly and a model identifier plus image location are present. Do not infer publicly accessible image URLs from local paths. The `public_image_url` adapter returns a Pages URL only when `PUBLIC_PAGES_CONFIRMED=true` and a repository is configured; the owner must independently verify that URL from outside GitHub. For Instagram, set `image_url` to a verified public HTTPS URL before approval or the post is blocked. GitHub Pages is public; never publish sensitive assets. Check current GitHub repository and Pages limits before adding large image libraries.
 
 ## GitHub deployment
 

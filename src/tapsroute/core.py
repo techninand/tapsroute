@@ -70,6 +70,8 @@ def approve(store, post_id, reviewer, platforms=None):
         if validate_post(p)!="VALID": raise ValueError("Post is blocked: a suitable image is required")
         selected=platforms or p["platforms"]
         if not selected or any(x not in ("facebook","instagram") or x not in p["platforms"] for x in selected): raise ValueError("Approval platform selection is invalid")
+        if "instagram" in selected and not p.get("image_url", "").startswith("https://"):
+            raise ValueError("Instagram approval requires a verified public HTTPS image URL")
         p["approval_status"]="APPROVED"; p["status"]="SCHEDULED"; p["approval"]={"reviewer":reviewer,"decision_at":datetime.now(IST).isoformat(),"content_version":p["content_version"],"platforms":selected}
         d["events"].append({"at":datetime.now(IST).isoformat(),"type":"APPROVED","post_id":post_id,"reviewer":reviewer})
     store.change(op)

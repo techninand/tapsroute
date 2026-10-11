@@ -2,6 +2,7 @@ import json, tempfile, threading, unittest
 from datetime import datetime, timezone, date
 from pathlib import Path
 from tapsroute.core import Store, reserve, remaining, IST, schedule_at, new_post, approve, due_posts, validate_post
+from tapsroute.images import find_fallback_image
 
 class CoreTests(unittest.TestCase):
  def setUp(self):
@@ -29,7 +30,9 @@ class CoreTests(unittest.TestCase):
  def post(self):
   return new_post('Goa','Weekend','English',['facebook'],'A Goa weekend','Sample planning inspiration',[], 'Explore','AI Goa beach',schedule_at(date(2026,1,2),'10:00'),image_path='images/goa.jpg')
  def test_approval_and_due_validation(self):
-  p=self.post();self.store.change(lambda d:d['posts'].append(p));approve(self.store,p['id'],'owner')
+  p=self.post();self.store.change(lambda d:d['posts'].append(p))
+  self.assertEqual(due_posts(self.store.read(),datetime(2026,1,3,tzinfo=IST)),[])
+  approve(self.store,p['id'],'owner')
   self.assertEqual(len(due_posts(self.store.read(),datetime(2026,1,3,tzinfo=IST))),1)
   p['content_version']+=1;self.store.change(lambda d:d.update(posts=[p]));self.assertEqual(due_posts(self.store.read(),datetime(2026,1,3,tzinfo=IST)),[])
  def test_missing_image_blocks(self):
@@ -41,4 +44,13 @@ class CoreTests(unittest.TestCase):
   with self.assertRaises(ValueError):validate_post(p)
  def test_store_reopens_state(self):
   self.store.change(lambda d:d['posts'].append({'id':'x'}));self.assertEqual(self.store.read()['posts'][0]['id'],'x')
+ def test_image_fallback_requires_validated_destination_and_model(self):
+  library=Path(self.tmp.name)/'library.json'
+  library.write_text(json.dumps({'images':[{'id':'bad','destination':'Goa','validated_for_destination':False,'model':'sdxl','image_path':'images/a.jpg'},{'id':'good','destination':'Goa','validated_for_destination':True,'model':'sdxl','image_path':'images/b.jpg'}]}))
+  self.assertEqual(find_fallback_image('Goa','Weekend',library)['id'],'good')
+  self.assertIsNone(find_fallback_image('Jaipur','Weekend',library))
+ def test_instagram_approval_requires_public_image_url(self):
+  p=self.post();p['platforms']=['instagram'];p['platform_status']={'instagram':{'status':'PENDING'}}
+  self.store.change(lambda d:d['posts'].append(p))
+  with self.assertRaisesRegex(ValueError,'HTTPS'): approve(self.store,p['id'],'owner')
 if __name__=='__main__':unittest.main()
