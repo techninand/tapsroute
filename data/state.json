@@ -1,6 +1,7 @@
 {
   "generation_days": {
-    "2026-10-11": 2
+    "2026-10-11": 2,
+    "2026-10-12": 1
   },
   "posts": [
     {
@@ -88,6 +89,49 @@
         "model": null,
         "source": null
       }
+    },
+    {
+      "id": "d41e6936-2e21-40ba-9c51-722dd4ed8473",
+      "destination": "Jaipur",
+      "category": "Indian holidays",
+      "language": "English",
+      "platforms": [
+        "facebook",
+        "instagram"
+      ],
+      "format": "image",
+      "headline": "Sample Indian holidays: Jaipur",
+      "caption": "Sample English planning content for Jaipur. Verify travel details before booking. Let's Travel with Tapsroute — Explore the World with Confidence. https://tapsroute.com | +91 8450-98-4534 | customer.experience@tapsroute.com",
+      "hashtags": [
+        "#Tapsroute",
+        "#TravelInspiration"
+      ],
+      "call_to_action": "Plan your trip with Tapsroute",
+      "image_prompt": "AI-generated travel illustration of Jaipur; no text, no prices, no people logos.",
+      "image_path": "",
+      "image_url": "",
+      "created_at": "2026-10-12T19:10:29.549502+05:30",
+      "scheduled_at": "2026-10-13T10:00:00+05:30",
+      "approval_status": "PENDING_APPROVAL",
+      "status": "BLOCKED",
+      "platform_status": {
+        "facebook": {
+          "status": "PENDING"
+        },
+        "instagram": {
+          "status": "PENDING"
+        }
+      },
+      "retry_count": 0,
+      "error_details": "No AI-generated image supplied; import and validate a destination-matched image before approval.",
+      "content_version": 1,
+      "approval": null,
+      "sample": true,
+      "image_generation": {
+        "status": "BLOCKED_NO_VALIDATED_AI_IMAGE",
+        "model": null,
+        "source": null
+      }
     }
   ],
   "events": [
@@ -101,6 +145,12 @@
       "at": "2026-10-11T18:35:27.965173+05:30",
       "type": "CONTENT_CREATED",
       "post_id": "83a6be50-a97c-4f91-874b-a0658f19a987",
+      "status": "BLOCKED"
+    },
+    {
+      "at": "2026-10-12T19:10:29.552697+05:30",
+      "type": "CONTENT_CREATED",
+      "post_id": "d41e6936-2e21-40ba-9c51-722dd4ed8473",
       "status": "BLOCKED"
     }
   ]
